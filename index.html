@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>線上抽獎系統 by BaconBao</title>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="author" content="BaconBao">
+	<meta name="description" content="點擊幾下就可以規劃獎項與名額，輕鬆快速的完成線上抽獎！">
+	<meta property="og:image" content="ogimage.jpg"/>  
+	<link rel="icon" type="image/x-icon" href="https://assets-cdn.github.com/favicon.ico">
+	<link rel="stylesheet" href="lib/bootstrap-3.3.6.min.css">
+	<style>
+	body {
+		padding: 15px;
+		padding-top: 50px;
+		font-family: 'Segoe UI',Helvetica,Arial,'Microsoft YaHei',FreeSans,Arimo,'Droid Sans','wenquanyi micro hei','Hiragino Sans GB','Hiragino Sans GB W3',Arial,sans-serif;
+	}
+	textarea.form-control {
+		border-radius: 0px;
+	}
+	#copyright {
+		padding-top: 5px;
+		width: 800px;
+		margin: 0 auto;
+		text-align: center;		
+	}
+	#box {
+		width: 800px;
+		margin: 0 auto;
+		border: 1px solid #bbb;
+	}
+	#top {
+		background: #4285f4;
+		color: #fff;
+		font-size: 30px;
+		font-weight: bold;
+		padding: 10px;
+	}
+	#content .left {
+		display: inline-block;
+		width: 55%;
+		vertical-align: top;
+		padding: 3px;
+	}
+	#content .right {
+		display: inline-block;
+		width: 44%;
+		vertical-align: top;
+		padding: 3px;
+	}
+	#footer {
+		background: #eee;
+		border-top: 1px solid #ddd;
+		padding: 10px 15px;
+		color: #777;
+	}
+	#footer a {
+		color: #777;
+	}
+	#add_price {
+		font-weight: bold;
+		font-size: 30px;
+		float: right;
+		margin-top: -25px;
+	}
+	#letsgo {
+		width: 99.99%;
+		margin-top: 3px;
+		border-radius: 0px;
+		font-weight: bold;
+		font-size: 25px;
+	}
+	#intro1 {
+		text-align: right;
+		height: 24px;
+	}
+	#results {
+		padding: 15px;
+	}
+	#congrats {
+		text-align: center;
+		color: #FF5722;
+		font-size: 30px;
+		font-weight: bold;
+	}
+	#restart {
+		float: right;
+		font-weight: bold;
+	}
+	.btn-circle {
+		width: 49px;
+		height: 49px;
+		text-align: center;
+		padding: 0px 0;
+		font-size: 20px;
+		line-height: 0.00;
+		border-radius: 30px;
+		vertical-align: top;
+		border-top: 0px;
+	}
+	.priceNumber {
+		display: inline-block;
+		background: #FF5722;
+		font-size: 15px;
+		font-weight: bold;
+		padding: 5px 5px 10px 5px;
+		color: #fff;
+		margin-right: 50px;
+	}
+	.priceBox {
+		background: #ffc107;
+		margin-top: 3px;
+		border: 1px solid #eee;
+	}
+	.priceBox .count {
+		font-size: 20px;
+		font-weight: bold;
+	}
+	.pn {
+		display: block;
+		background: #ff8013;
+		font-size: 18px;
+		font-weight: bold;
+		padding: 5px 5px 10px 5px;
+		color: #fff;
+		margin: 8px 0px 5px;
+	}
+	.pnw {
+		display: block;
+		font-size: 18px;
+		font-weight: 500;
+		padding: 1px 0px 0px 15px;
+		color: #000;
+	}
+	</style>
+	<script src="lib/jquery-1.11.3.min.js"></script>
+	<script>
+	$(document).ready(function(){
+
+		/*--===================
+			UI & Works before start. 
+		=======================--*/
+		$('#results').hide();
+		$('#letsgo').fadeOut();
+		$('#letsgo').fadeIn('slow');
+		if(typeof(Storage) !== "undefined"){
+			if( sessionStorage["candidates"] !== undefined ){
+				$('textarea[name=candidates]').val(sessionStorage["candidates"]);
+			}
+		}
+
+		var temp_price_list_count = 1;
+		setClickBind();
+
+		$("#add_price").click(function(){
+			temp_price_list_count++;
+			$('#price_list').append('<div class="priceBox"><span class="priceNumber">'+'獎項 #'+temp_price_list_count+'</span><button class="btn btn-default btn-sm decrease">-</button>抽出<span class="count">1</span>名<button class="btn btn-default btn-sm increase">+</button></div>');
+
+			setClickBind();
+
+			if( $('#content>.right').height() > $('textarea[name=candidates]').height() ){
+				$('textarea[name=candidates]').css('height', $('#content>.right').height()+'px');
+			}
+
+		});
+		$('#restart').click(function(){ document.location.reload(); });
+
+		/*--===================
+			Works after start. 
+		=======================--*/
+		var temp_total_count = 0;
+		var candidates = [];
+		var price_count = 0;
+		var volume = [];
+		var winner = [];
+
+		$('#letsgo').click(function(){
+
+			if(typeof(Storage) !== "undefined"){
+				sessionStorage.setItem('candidates', $('textarea[name=candidates]').val());
+			}
+			re_init();
+
+			/*--- GET All Price and their Volume---*/
+			$('.priceBox').each(function(){
+				price_count++;
+				var tmpCount = parseInt($('>.count',this).text());
+				volume.push(tmpCount);
+				temp_total_count = temp_total_count + tmpCount;
+			});
+			showArray('[price_volume] ', volume);
+
+			/*--- GET All Candidates ---*/
+			candidates = [];
+			var ps = $.trim($('textarea[name=candidates]').val()).replace(/,/g, '\n').split('\n');
+			for(var i=0; i<ps.length; i++){
+				var p = $.trim(ps[i]);
+				if(p.length == 0){
+					continue;
+				}
+				candidates.push(p);
+			}
+			showArray('[init] ', candidates);
+
+			/*--- Candidates' Data check ---*/
+			if(candidates.length<temp_total_count){
+				alert('名單少於獎項名額。');
+				console.log('--------------ENDING--------------');
+				return false;
+			}
+
+			/*--- Main work ---*/
+			for(var j=0; j<price_count; j++){
+				/*--- shuffle ---*/
+				shuffle(candidates);
+				showArray('[after_shuffle] ', candidates);
+				/*--- get winner ---*/
+				winner[j] = candidates.splice(0,volume[j]);
+				showArray('[winner-'+(j+1)+']', winner[j]);
+				console.log('///Price'+(j+1)+' Done///');
+				showArray('[remaining] ', candidates);
+				/*--- remove the same winner ---*/
+				for(var k=0; k<winner[j].length; k++){
+					var removeItem = winner[j][k];
+					candidates = jQuery.grep(candidates, function(value) {
+					  return value != removeItem;
+					});
+				}
+				showArray('[after_remove_same] ', candidates);
+			}
+
+			/*--- Print the Winners ---*/
+			for(var k=0; k<winner.length; k++){
+				$('#results').append('<span class="pn">獎項 #'+(k+1)+'</span>');
+				for(var m=0; m<winner[k].length; m++){
+					$('#results').append('<span class="pnw">'+winner[k][m]+'</span>');
+				}
+			}
+			console.log('--------------ENDING--------------');
+			$('#content').fadeOut();
+			$('#footer').fadeOut(function(){
+				$('#results').fadeIn()
+			});
+		});
+
+		/*--===========
+			Functions
+		============--*/
+		function showArray(quote, ary){
+			var str = '';
+			for(var i=0; i<ary.length; i++){
+				str += ary[i]+',';
+			}
+			console.log(quote + str);
+		}
+
+		function shuffle(array) {
+			var currentIndex = array.length, temporaryValue, randomIndex;
+			while (0 !== currentIndex) {
+				randomIndex = Math.floor(Math.random() * currentIndex);
+				currentIndex -= 1;
+				temporaryValue = array[currentIndex];
+				array[currentIndex] = array[randomIndex];
+				array[randomIndex] = temporaryValue;
+			}
+			return array;
+		}
+
+		function re_init(){
+			temp_total_count = 0;
+			candidates = [];
+			price_count = 0;
+			volume = [];
+			winner = [];			
+		}
+
+		function setClickBind(){
+			$('.decrease').off('click').on('click', function(){
+				var val = parseInt( $(this).parent('.priceBox').children('.count').text() );
+				if(val>=1) $(this).parent('.priceBox').children('.count').text(val-1);
+			});
+			$('.increase').off('click').on('click', function(){
+				var val = parseInt( $(this).parent('.priceBox').children('.count').text() );
+				$(this).parent('.priceBox').children('.count').text(val+1);
+			});
+		}
+
+	});
+	</script>
+</head>
+<body>
+
+	<div id="box">
+		<div id="top">線上抽獎系統</div>
+		<div id="content">
+			<div class="left">
+				<textarea name="candidates" class="form-control" rows="12">Steve Jobs
+Mark Zuckerberg
+Larry Page
+Sergey Brin
+Lei Jun
+Robin Li
+Jack Ma
+Terry Gou
+Morris Chang
+Stan Shih</textarea>
+			</div>
+			<div class="right">
+				<button id="add_price" class="btn btn-circle btn-danger">+</button>
+				<div id="intro1">點此新增獎項與名額 →</div>
+				<div id="price_list">
+					<div class="priceBox"><span class="priceNumber">獎項 #1</span><button class="btn btn-default btn-sm decrease">-</button>抽出<span class="count">1</span>名<button class="btn btn-default btn-sm increase">+</button></div>
+				</div>
+				<button id="letsgo" class="btn btn-success">開始抽獎！</button>
+			</div>
+		</div>
+		<div id="footer">
+			Note.<br />
+			<span>1. <b style="color: #4285f4;">請將名單填入上方輸入框，並以換行做分隔。</b><br /></span>
+			<span>2. 抽獎順序為： 獎項#1 → 獎項#2 → ...... → 獎項#N。<br /></span>
+			<span>3. 每一輪獎項的名單皆會排除上一輪的中獎者。<br /></span>
+			<span>4. 亂數抽取算法採用 <a href="http://stackoverflow.com/a/2450976" target="_blank">The Fisher-Yates (aka Knuth) shuffle</a><br /></span>
+		</div>
+		<div id="results">
+			<button id="restart" class="btn btn-success">重新開始</button>
+			<div id="congrats">恭喜以下得獎者！</div>
+		</div>
+	</div>
+	<div id="copyright">
+		<span>The tool made by <a href="" target="http://baconbao.github.io/Resume/timeline/">BaconBao Lin</a>. Source code on <a href="https://github.com/baconbao/BaconLottery" target="_blank">GitHub</a></span>
+	</div>
+</body>
+</html>
