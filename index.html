@@ -87,6 +87,9 @@
 		float: right;
 		font-weight: bold;
 	}
+	#candidates_count {
+		float: left;
+	}
 	.btn-circle {
 		width: 49px;
 		height: 49px;
@@ -201,6 +204,7 @@
 				candidates.push(p);
 			}
 			showArray('[init] ', candidates);
+			$('#candidates_count').text('本次共'+candidates.length+'位抽獎者');
 
 			/*--- Candidates' Data check ---*/
 			if(candidates.length<temp_total_count){
@@ -324,6 +328,7 @@ Stan Shih</textarea>
 			<span>4. 亂數抽取算法採用 <a href="http://stackoverflow.com/a/2450976" target="_blank">The Fisher-Yates (aka Knuth) shuffle</a><br /></span>
 		</div>
 		<div id="results">
+			<span id="candidates_count">123</span>
 			<button id="restart" class="btn btn-success">重新開始</button>
 			<div id="congrats">恭喜以下得獎者！</div>
 		</div>
