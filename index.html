@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>線上抽獎系統 by BaconBao</title>
+    <title>Stand-ups lottery</title>
 	<meta charset="utf-8" />
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-	<meta name="author" content="BaconBao">
-	<meta name="description" content="點擊幾下就可以規劃獎項與名額，輕鬆快速的完成線上抽獎！">
+	<meta name="author" content="Ash">
+	<meta name="description" content="set a pool to do the daily lottery">
 	<meta property="og:image" content="ogimage.jpg"/>  
 	<link rel="icon" type="image/x-icon" href="https://assets-cdn.github.com/favicon.ico">
 	<link rel="stylesheet" href="lib/bootstrap-3.3.6.min.css">
@@ -157,7 +157,7 @@
 
 		$("#add_price").click(function(){
 			temp_price_list_count++;
-			$('#price_list').append('<div class="priceBox"><span class="priceNumber">'+'獎項 #'+temp_price_list_count+'</span><button class="btn btn-default btn-sm decrease">-</button>抽出<span class="count">1</span>名<button class="btn btn-default btn-sm increase">+</button></div>');
+			$('#price_list').append('<div class="priceBox"><span class="priceNumber">'+'Speaker #'+temp_price_list_count+'</span><button class="btn btn-default btn-sm decrease">-</button>Pick<span class="count"> 1 </span>person<button class="btn btn-default btn-sm increase">+</button></div>');
 
 			setClickBind();
 
@@ -235,7 +235,7 @@
 
 			/*--- Print the Winners ---*/
 			for(var k=0; k<winner.length; k++){
-				$('#results').append('<span class="pn">獎項 #'+(k+1)+'</span>');
+				$('#results').append('<span class="pn">Speaker #'+(k+1)+'</span>');
 				for(var m=0; m<winner[k].length; m++){
 					$('#results').append('<span class="pnw">'+winner[k][m]+'</span>');
 				}
@@ -297,27 +297,24 @@
 <body>
 
 	<div id="box">
-		<div id="top">線上抽獎系統</div>
+		<div id="top"> <img src="assets/download-1.svg"></img> Daily Stand-ups lottery</div>
 		<div id="content">
 			<div class="left">
-				<textarea name="candidates" class="form-control" rows="12">Steve Jobs
-Mark Zuckerberg
-Larry Page
-Sergey Brin
-Lei Jun
-Robin Li
-Jack Ma
-Terry Gou
-Morris Chang
-Stan Shih</textarea>
+				<textarea name="candidates" class="form-control" rows="12">Sam
+Nick
+Niss
+Julian
+Peter
+Ash
+</textarea>
 			</div>
 			<div class="right">
 				<button id="add_price" class="btn btn-circle btn-danger">+</button>
-				<div id="intro1">點此新增獎項與名額 →</div>
+				<div id="intro1">Add a new one! →</div>
 				<div id="price_list">
-					<div class="priceBox"><span class="priceNumber">獎項 #1</span><button class="btn btn-default btn-sm decrease">-</button>抽出<span class="count">1</span>名<button class="btn btn-default btn-sm increase">+</button></div>
+					<div class="priceBox"><span class="priceNumber">Speaker #1</span><button class="btn btn-default btn-sm decrease">-</button>Pick<span class="count"> 1 </span>person<button class="btn btn-default btn-sm increase">+</button></div>
 				</div>
-				<button id="letsgo" class="btn btn-success">開始抽獎！</button>
+				<button id="letsgo" class="btn btn-success">Start！</button>
 			</div>
 		</div>
 		<div id="footer">
@@ -329,8 +326,8 @@ Stan Shih</textarea>
 		</div>
 		<div id="results">
 			<span id="candidates_count">123</span>
-			<button id="restart" class="btn btn-success">重新開始</button>
-			<div id="congrats">恭喜以下得獎者！</div>
+			<button id="restart" class="btn btn-success">Restart</button>
+			<div id="congrats">Congrats！</div>
 		</div>
 	</div>
 	<div id="copyright">
